@@ -51,6 +51,7 @@
       var start = function () {
         window.addEventListener("devicemotion", onMotion);
         ov.style.display = "none";
+        window.r2rStarted = true;          // the game (paused under the overlay) starts its intro now
         setTimeout(window.r2rCalibrate, 400);
         setTimeout(window.r2rCalibrate, 1200);   // (again, in case the first reading came late)
         var c = document.querySelector("canvas"); if (c) c.focus();
