@@ -1,0 +1,21 @@
+{
+ "_note": "REMOTE ad-offer timing for Race 2 Race (test mode, fake ads only). Deployed next to index.html; the game reads it at start and lays it over config/ads.json. Change the numbers here and push: no new build needed.",
+ "version": "remote-1",
+ "ads_enabled": true,
+ "ad_seconds": 5.0,
+ "second_chance": {
+  "enabled": true,
+  "max_per_race": 1,
+  "offer_after_fall": true,
+  "offer_when_place_at_least": 7,
+  "offer_from_lap": 2,
+  "offer_seconds": 6.0,
+  "cooldown_seconds": 25.0,
+  "boost_seconds": 2.0,
+  "boost_extra_speed": 7.0,
+  "finish_guard_metres": 250.0
+ },
+ "double_miles": {
+  "enabled": true
+ }
+}
