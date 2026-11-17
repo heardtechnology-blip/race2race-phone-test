@@ -4,7 +4,15 @@
 // way the phone is held at that moment becomes "straight ahead". main.gd reads window.r2rTilt() every frame
 // (degrees the phone is turned round the screen's axis; positive = turned clockwise = steer right; 999 = no data)
 // and calls window.r2rCalibrate() again at CONTINUE. ?tiltinvert=1 in the address swaps left and right.
+// Block 3 menus (Nov 16 2026): the overlay is built HIDDEN. The game shows it when it wants the tap: the menu at its
+// TAP TO START step (after the intro), main.gd when a race is opened directly. window.r2rShowStart() shows it.
 (function () {
+  var wantStart = false;
+  window.r2rShowStart = function () {
+    wantStart = true;
+    var o = document.getElementById("r2r-start");
+    if (o && !window.r2rStarted) o.style.display = "flex";
+  };
   var s = { on: false, gx: 0, gy: 0, nx: 0, ny: -1, have: false };
   var invert = /[?&]tiltinvert=1/.test(location.search) ? -1 : 1;
 
@@ -46,6 +54,7 @@
     ov.innerHTML = "<div>RACE 2 RACE</div><button id='r2r-go'>TAP TO START</button>" +
       "<small>Hold the phone sideways like a steering wheel, then tap.<br>Turn it to steer. " +
       "Your phone will ask to use motion: tap Allow.<br>BRAKE and BOOST are on screen.</small>";
+    ov.style.display = wantStart ? "flex" : "none";
     document.body.appendChild(ov);
     document.getElementById("r2r-go").addEventListener("click", function () {
       var start = function () {
