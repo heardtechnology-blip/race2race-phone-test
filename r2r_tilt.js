@@ -13,23 +13,34 @@
     var o = document.getElementById("r2r-start");
     if (o && !window.r2rStarted) o.style.display = "flex";
   };
-  var s = { on: false, gx: 0, gy: 0, nx: 0, ny: -1, have: false };
+  // Nov 17 2026 (the kart "veered right" on the iPhone): fx/fy = the sensor with the hands' shake taken out (about
+  // 0.05 s), it steers; sx/sy = how the phone has been held over the last half second, "straight ahead" is taken from it.
+  var s = { on: false, gx: 0, gy: 0, nx: 0, ny: -1, have: false, fx: 0, fy: 0, sx: 0, sy: 0, t: 0 };
   var invert = /[?&]tiltinvert=1/.test(location.search) ? -1 : 1;
 
   function onMotion(e) {
     var g = e.accelerationIncludingGravity;
     if (!g || g.x === null || g.y === null) return;
+    var now = (window.performance && performance.now) ? performance.now() : Date.now();
+    var dt = Math.min(Math.max((now - s.t) / 1000, 0), 0.1);
+    s.t = now;
+    if (!s.have) { s.fx = s.sx = g.x; s.fy = s.sy = g.y; }
+    else {
+      var a = 1 - Math.exp(-dt / 0.05), b = 1 - Math.exp(-dt / 0.5);
+      s.fx += (g.x - s.fx) * a; s.fy += (g.y - s.fy) * a;
+      s.sx += (g.x - s.sx) * b; s.sy += (g.y - s.sy) * b;
+    }
     s.gx = g.x; s.gy = g.y; s.have = true;
   }
   window.r2rCalibrate = function () {
-    var m = Math.hypot(s.gx, s.gy);
-    if (s.have && m > 2) { s.nx = s.gx / m; s.ny = s.gy / m; s.on = true; }
+    var m = Math.hypot(s.sx, s.sy);
+    if (s.have && m > 2) { s.nx = s.sx / m; s.ny = s.sy / m; s.on = true; }
   };
   window.r2rTilt = function () {
     if (!s.on) return 999;
-    var m = Math.hypot(s.gx, s.gy);
+    var m = Math.hypot(s.fx, s.fy);
     if (m < 2) return 0;                      // lying flat: no steering
-    var cx = s.gx / m, cy = s.gy / m;
+    var cx = s.fx / m, cy = s.fy / m;
     return invert * Math.atan2(s.nx * cy - s.ny * cx, s.nx * cx + s.ny * cy) * 180 / Math.PI;
   };
 
