@@ -6,11 +6,17 @@
 // and calls window.r2rCalibrate() again at CONTINUE. ?tiltinvert=1 in the address swaps left and right.
 // Block 3 menus (Nov 16 2026): the overlay is built HIDDEN. The game shows it when it wants the tap: the menu at its
 // TAP TO START step (after the intro), main.gd when a race is opened directly. window.r2rShowStart() shows it.
+// Section 57 (Nov 21 2026): window.r2rShowStart("title") = the menus' TITLE SCENE is behind it: the overlay is then
+// see-through and the whole page is the button (the game draws its own pulsing TAP TO START; only the one-line
+// motion hint is shown, at the very bottom). The tap still happens on the page, as iPhones need for the tilt sensor.
 (function () {
   var wantStart = false;
-  window.r2rShowStart = function () {
+  var wantLook = "";
+  window.r2rShowStart = function (look) {
     wantStart = true;
+    wantLook = look === "title" ? "title" : "";
     var o = document.getElementById("r2r-start");
+    if (o) o.className = wantLook;
     if (o && !window.r2rStarted) o.style.display = "flex";
   };
   // Nov 17 2026 (the kart "veered right" on the iPhone): fx/fy = the sensor with the hands' shake taken out (about
@@ -52,6 +58,13 @@
       "#r2r-start button{font:800 30px -apple-system,system-ui,sans-serif;padding:22px 40px;border:0;border-radius:22px;" +
       "background:#ffd23f;color:#3a1d6e;margin:18px 0;box-shadow:0 6px 0 #c79b00}" +
       "#r2r-start small{font-weight:500;opacity:.85;max-width:520px;line-height:1.35}" +
+      "#r2r-start.title{background:transparent;justify-content:flex-end;padding:0}" +
+      "#r2r-start.title>div{display:none}" +
+      "#r2r-start.title button{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;border-radius:0;" +
+      "background:transparent;box-shadow:none;color:transparent;outline:none;-webkit-tap-highlight-color:transparent}" +
+      "#r2r-start.title small{position:relative;pointer-events:none;font-size:11px;opacity:.75;max-width:none;margin:0 0 2px;" +
+      "text-shadow:0 1px 2px #2a1450}" +
+      "#r2r-start.title small .long{display:none}" +
       "#r2r-rotate{display:none;position:fixed;inset:0;z-index:1001;background:#2a1450;color:#fff;align-items:center;" +
       "justify-content:center;text-align:center;font:700 24px -apple-system,system-ui,sans-serif;padding:30px}" +
       "@media (orientation:portrait){#r2r-rotate{display:flex}}";
@@ -63,8 +76,9 @@
     var ov = document.createElement("div");
     ov.id = "r2r-start";
     ov.innerHTML = "<div>RACE 2 RACE</div><button id='r2r-go'>TAP TO START</button>" +
-      "<small>Hold the phone sideways like a steering wheel, then tap.<br>Turn it to steer. " +
-      "Your phone will ask to use motion: tap Allow.<br>BRAKE and BOOST are on screen.</small>";
+      "<small><span class='long'>Hold the phone sideways like a steering wheel, then tap.<br>Turn it to steer. </span>" +
+      "Your phone will ask to use motion: tap Allow.<span class='long'><br>BRAKE and BOOST are on screen.</span></small>";
+    ov.className = wantLook;
     ov.style.display = wantStart ? "flex" : "none";
     document.body.appendChild(ov);
     document.getElementById("r2r-go").addEventListener("click", function () {
